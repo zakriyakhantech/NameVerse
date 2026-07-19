@@ -46,8 +46,63 @@ const nextConfig = {
   // canonical islamic/christian/hindu) lives in middleware.js, NOT here, to
   // avoid double-hop redirect chains. Do not re-add those four rules below.
   async redirects() {
+    const HOST_OLD = 'nameverse.vercel.app';
+    const HOST_NEW = 'https://nameverse.site';
+
+    const hostRule = (source, destination) => ({
+      source,
+      has: [{ type: 'host', value: HOST_OLD }],
+      destination,
+      permanent: true,
+    });
+
     return [
-      // Old /baby-names/ paths → new /names/ structure
+      // ── DOMAIN MIGRATION: nameverse.vercel.app → nameverse.site ──
+      // Host-scoped rules: only fire when Host = nameverse.vercel.app.
+      // Requests already on nameverse.site are never touched (no loop).
+      hostRule('/', `${HOST_NEW}/`),
+      hostRule('/names', `${HOST_NEW}/names`),
+      hostRule('/search', `${HOST_NEW}/search`),
+      hostRule('/blog', `${HOST_NEW}/blog`),
+      hostRule('/about', `${HOST_NEW}/about`),
+      hostRule('/privacy', `${HOST_NEW}/privacy`),
+      hostRule('/terms', `${HOST_NEW}/terms`),
+      hostRule('/languages', `${HOST_NEW}/languages`),
+      hostRule('/popularity', `${HOST_NEW}/popularity`),
+      hostRule('/name-meanings', `${HOST_NEW}/name-meanings`),
+      hostRule('/names-by-meaning', `${HOST_NEW}/names-by-meaning`),
+      hostRule('/names-by-origin', `${HOST_NEW}/names-by-origin`),
+      hostRule('/unique-names', `${HOST_NEW}/unique-names`),
+      hostRule('/trending-names', `${HOST_NEW}/trending-names`),
+      hostRule('/advanced-search', `${HOST_NEW}/advanced-search`),
+      hostRule('/my-names', `${HOST_NEW}/my-names`),
+      hostRule('/guides/expert-naming-guide', `${HOST_NEW}/guides/expert-naming-guide`),
+      hostRule('/viral-names', `${HOST_NEW}/viral-names`),
+      hostRule('/stories', `${HOST_NEW}/stories`),
+      // Gender listing pages
+      hostRule('/(islamic|christian|hindu)/(boy-names|girl-names)', `${HOST_NEW}/:1/:2`),
+      // Name detail pages
+      hostRule('/names/:religion(islamic|christian|hindu)/:slug', `${HOST_NEW}/names/:religion/:slug`),
+      // Blog posts
+      hostRule('/blog/:slug', `${HOST_NEW}/blog/:slug`),
+      // Collection: religion listing
+      hostRule('/names/religion/:religion(islamic|christian|hindu)/:page([0-9]+)', `${HOST_NEW}/names/religion/:religion/:page`),
+      // Collection: letter
+      hostRule('/names/:religion(islamic|christian|hindu)/letter/:letter([A-Za-z])/:page([0-9]+)', `${HOST_NEW}/names/:religion/letter/:letter/:page`),
+      // Collection: origin
+      hostRule('/names/:religion(islamic|christian|hindu)/origin/:origin([a-z0-9-]+)/:page([0-9]+)', `${HOST_NEW}/names/:religion/origin/:origin/:page`),
+      // Collection: categories
+      hostRule('/names/:religion(islamic|christian|hindu)/categories/:category([a-z0-9-]+)/:page([0-9]+)', `${HOST_NEW}/names/:religion/categories/:category/:page`),
+      // Legacy paths
+      hostRule('/baby-names/:path*', `${HOST_NEW}/names/:path*`),
+      hostRule('/baby-names', `${HOST_NEW}/names`),
+      hostRule('/name/:path*', `${HOST_NEW}/names/:path*`),
+      hostRule('/article/:path*', `${HOST_NEW}/blog/:path*`),
+      hostRule('/meaning/:path*', `${HOST_NEW}/name-meanings`),
+      hostRule('/stories/:path*', `${HOST_NEW}/blog`),
+      hostRule('/religions/:path*', `${HOST_NEW}/names`),
+
+      // ── LEGACY INTERNAL REDIRECTS (no host condition) ──
       {
         source: '/baby-names/:path*',
         destination: '/names/:path*',
@@ -58,13 +113,11 @@ const nextConfig = {
         destination: '/names',
         permanent: true,
       },
-      // /name/ (singular) → /names/ (plural canonical)
       {
         source: '/name/:path*',
         destination: '/names/:path*',
         permanent: true,
       },
-      // Legacy blog paths cleanup
       {
         source: '/article/:path*',
         destination: '/blog/:path*',

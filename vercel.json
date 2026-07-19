@@ -1,1 +1,15 @@
-{}
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "namevere.vercelp"
+        }
+      ],
+      "destination": "https://namevere.ssite/$1",
+      "permanent": true
+    }
+  ]
+}
