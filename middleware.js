@@ -167,8 +167,23 @@ function handleOldUrlRedirect(path) {
 }
 
 export function middleware(request) {
-  const { pathname } = request.nextUrl;
+  const { pathname, host, protocol } = request.nextUrl;
   const path = pathname;
+  const canonicalHost = (process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site').replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+
+  // Redirect old Vercel host or www to the canonical domain in ONE hop.
+  if (host && (host === 'nameverse.vercel.app' || host === 'www.nameverse.vercel.app' || host === 'www.' + canonicalHost)) {
+    const url = new URL(request.url);
+    url.hostname = canonicalHost;
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, 301);
+  }
+
+  if (protocol === 'http' && host && host !== canonicalHost) {
+    const url = new URL(request.url);
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, 301);
+  }
 
   // ── SYSTEM ROUTES: Pass through immediately ──
   if (isSystemRoute(path)) {

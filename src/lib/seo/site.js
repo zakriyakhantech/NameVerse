@@ -1,10 +1,13 @@
 /**
  * Single source of truth for public site URL (no trailing slash)
  * SEO-safe + canonical-safe version
+ *
+ * Set NEXT_PUBLIC_SITE_URL in Vercel to your production domain, such as:
+ * https://nameverse.site
  */
 
 const rawSiteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://nameverse.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://nameverse.site"
 ).trim();
 
 // Guarantee a protocol so consumers using `new URL(SITE_URL)` never throw

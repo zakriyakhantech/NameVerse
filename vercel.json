@@ -1,14 +1,14 @@
 {
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "host",
-          "value": "namevere.vercelp"
+          "value": "nameverse.vercel.app"
         }
       ],
-      "destination": "https://namevere.ssite/$1",
+      "destination": "https://nameverse.site/:path*",
       "permanent": true
     }
   ]
