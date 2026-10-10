@@ -12,7 +12,7 @@ const DOMAIN = (() => {
     const candidate = /^https?:\/\//i.test(rawSiteUrl) ? rawSiteUrl : `https://${rawSiteUrl}`;
     return new URL(candidate).origin;
   } catch {
-    return 'https://nameverse.vercel.app';
+    return 'https://nameverse.site';
   }
 })();
 const publishedDate = new Date().toISOString().split('T')[0];

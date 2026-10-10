@@ -15,7 +15,7 @@ export const SITE_CONFIG = {
   name: 'NameVerse',
   tagline: 'Baby Names with Meanings, Origins & Lucky Numbers',
   description: 'Discover baby names with verified meanings, origins, lucky numbers, pronunciation guides, and cultural context across Islamic, Hindu, Christian and global traditions.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.vercel.app',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site',
   logo: '/logo.png',
   logoWidth: 512,
   logoHeight: 512,

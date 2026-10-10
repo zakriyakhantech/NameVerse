@@ -2,7 +2,7 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.vercel.app'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site'
 )
   .trim()
   .replace(/\/+$/, '');

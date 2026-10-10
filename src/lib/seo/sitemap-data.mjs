@@ -31,6 +31,7 @@ const STATIC_ORIGINS = ['arabic', 'persian', 'turkish', 'indian', 'english', 'ot
 const MAX_SITEMAP_URLS = 45000;
 const MAX_COLLECTION_PAGES = 50; // Prevent thin pages beyond page 50
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || 'https://name-meaning-site-backend.vercel.app').replace(/\/+$/, '');
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site').replace(/\/+$/, '');
 
 // Reserved slugs that should never appear in sitemap
 const RESERVED_SLUGS = new Set([
@@ -58,9 +59,8 @@ function readJson(file, fallback) {
   }
 }
 
-function writeJson(file, data) {
+function writeFileContents(file, content) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  const content = `${JSON.stringify(data, null, 2)}\n`;
   // Retry on transient filesystem errors (e.g. file lock from sync tools).
   let lastError;
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -72,6 +72,10 @@ function writeJson(file, data) {
     }
   }
   throw lastError;
+}
+
+function writeJson(file, data) {
+  writeFileContents(file, `${JSON.stringify(data, null, 2)}\n`);
 }
 
 function cleanText(value = '') {
@@ -246,7 +250,7 @@ export function loadBlogPosts() {
 
 function getEntry(pathname, type, lastmod = today, changefreq = 'weekly', priority = 0.7) {
   return {
-    loc: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.vercel.app'}${pathname}`,
+    loc: `${SITE_URL}${pathname}`,
     lastmod,
     changefreq,
     priority,
@@ -544,8 +548,8 @@ export async function writeSitemapFiles() {
     const chunksOfItems = chunk(items, MAX_SITEMAP_URLS);
     for (let i = 0; i < chunksOfItems.length; i += 1) {
       const file = chunksOfItems.length === 1 ? `sitemap-${name}.xml` : `sitemap-${name}-${i + 1}.xml`;
-      writeJson(path.join(publicDir, file), sitemapXml(chunksOfItems[i]));
-      sitemapLocs.push(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.vercel.app'}/${file}`);
+      writeFileContents(path.join(publicDir, file), sitemapXml(chunksOfItems[i]));
+      sitemapLocs.push(`${SITE_URL}/${file}`);
     }
   };
   
@@ -554,7 +558,7 @@ export async function writeSitemapFiles() {
   }
   
   const useIndex = entries.length > MAX_SITEMAP_URLS || sitemapLocs.length > 1;
-  writeJson(path.join(publicDir, 'sitemap.xml'), useIndex ? indexXml(sitemapLocs) : sitemapXml(entries));
+  writeFileContents(path.join(publicDir, 'sitemap.xml'), useIndex ? indexXml(sitemapLocs) : sitemapXml(entries));
   writeJson(path.join(publicDir, 'seo-sitemap-manifest.json'), { 
     generatedAt: new Date().toISOString(), 
     totalUrls: entries.length, 

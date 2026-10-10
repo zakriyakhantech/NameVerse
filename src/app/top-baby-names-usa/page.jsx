@@ -13,7 +13,7 @@ import {
 } from "../../data/top100Names2025";
 
 // ---- CONFIG: update these two if your domain changes ----
-const SITE_URL = "https://nameverse.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nameverse.site";
 const PAGE_PATH = "/top-baby-names-usa";
 // -----------------------------------------------------------
 

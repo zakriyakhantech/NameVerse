@@ -5,6 +5,8 @@ import { BookHeart, Globe2, PenTool, History } from 'lucide-react';
 import '../styles/animations-seo.css';
  
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site';
+
 const CulturalImportance = () => {
   const prefersReducedMotion = useReducedMotion();
 
@@ -99,20 +101,20 @@ const CulturalImportance = () => {
     '@type': 'Article',
     headline: 'The Deep Cultural Meaning Behind Every Baby Name',
     description: 'Discover verified baby names with meanings across Islamic, Hindu, Christian, and global traditions.',
-    image: 'https://nameverse.vercel.app/logo.png',
+    image: `${SITE_URL}/logo.png`,
     datePublished: '2024-01-15',
     dateModified: new Date().toISOString(),
     author: {
       '@type': 'Organization',
       name: 'NameVerse Baby Names',
-      url: 'https://nameverse.vercel.app'
+      url: SITE_URL
     },
     publisher: {
       '@type': 'Organization',
       name: 'NameVerse Baby Names',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://nameverse.vercel.app/logo.png',
+        url: `${SITE_URL}/logo.png`,
         width: 200,
         height: 60
       }
@@ -132,7 +134,7 @@ const CulturalImportance = () => {
         <meta itemProp="description" content="Discover verified baby names across Islamic, Hindu, Christian, and global traditions with cultural significance." />
         <meta itemProp="author" content="NameVerse Baby Names" />
         <meta itemProp="datePublished" content="2024-01-15" />
-        <meta itemProp="image" content="https://nameverse.vercel.app/logo.png" />
+        <meta itemProp="image" content={`${SITE_URL}/logo.png`} />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">

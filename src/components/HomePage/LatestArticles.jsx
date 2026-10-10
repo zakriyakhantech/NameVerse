@@ -91,7 +91,7 @@ const LatestArticles = ({ articles }) => {
   const generateArticleStructuredData = (article, position) => {
     const colors = categoryColors[article.category] || defaultColors;
     const date = article.publishDate || article.lastUpdated || new Date().toISOString();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site';
     const articleUrl = `${siteUrl}/blog/${article.id}`;
     
     const item = {

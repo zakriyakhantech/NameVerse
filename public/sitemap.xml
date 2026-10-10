@@ -1,1 +1,31 @@
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <sitemap>\n    <loc>https://nameverse.vercel.app/sitemap-pages.xml</loc>\n    <lastmod>2026-07-09</lastmod>\n  </sitemap>\n  <sitemap>\n    <loc>https://nameverse.vercel.app/sitemap-blog.xml</loc>\n    <lastmod>2026-07-09</lastmod>\n  </sitemap>\n  <sitemap>\n    <loc>https://nameverse.vercel.app/sitemap-popularity.xml</loc>\n    <lastmod>2026-07-09</lastmod>\n  </sitemap>\n  <sitemap>\n    <loc>https://nameverse.vercel.app/sitemap-letter.xml</loc>\n    <lastmod>2026-07-09</lastmod>\n  </sitemap>\n  <sitemap>\n    <loc>https://nameverse.vercel.app/sitemap-origin.xml</loc>\n    <lastmod>2026-07-09</lastmod>\n  </sitemap>\n  <sitemap>\n    <loc>https://nameverse.vercel.app/sitemap-category.xml</loc>\n    <lastmod>2026-07-09</lastmod>\n  </sitemap>\n  <sitemap>\n    <loc>https://nameverse.vercel.app/sitemap-gender.xml</loc>\n    <lastmod>2026-07-09</lastmod>\n  </sitemap>\n</sitemapindex>\n"
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://nameverse.site/sitemap-pages.xml</loc>
+    <lastmod>2026-07-09</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nameverse.site/sitemap-blog.xml</loc>
+    <lastmod>2026-07-09</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nameverse.site/sitemap-popularity.xml</loc>
+    <lastmod>2026-07-09</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nameverse.site/sitemap-letter.xml</loc>
+    <lastmod>2026-07-09</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nameverse.site/sitemap-origin.xml</loc>
+    <lastmod>2026-07-09</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nameverse.site/sitemap-category.xml</loc>
+    <lastmod>2026-07-09</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nameverse.site/sitemap-gender.xml</loc>
+    <lastmod>2026-07-09</lastmod>
+  </sitemap>
+</sitemapindex>

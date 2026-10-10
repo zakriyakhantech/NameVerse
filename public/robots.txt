@@ -32,4 +32,4 @@ Disallow: /*?source=
 Disallow: /*?page=
 
 # Sitemap
-Sitemap: https://nameverse.vercel.app/sitemap.xml
+Sitemap: https://nameverse.site/sitemap.xml

@@ -15,7 +15,7 @@
  * 7. Reject invalid slugs (empty, single char, numeric-only)
  */
 
-import { getSiteUrl } from './site';
+import { getSiteUrl } from './site.js';
 
 // Valid route prefixes (must match middleware whitelist)
 const VALID_RELIGIONS = ['islamic', 'christian', 'hindu'];
@@ -100,7 +100,7 @@ export function nameRelativeUrl(religion, slug) {
  * 
  * @param {string} religion - islamic/christian/hindu
  * @param {string} slug - valid lowercase slug
- * @returns {string|null} e.g. https://nameverse.vercel.app/names/islamic/abdullah or null if invalid
+ * @returns {string|null} e.g. https://nameverse.site/names/islamic/abdullah or null if invalid
  */
 export function nameAbsoluteUrl(religion, slug) {
   const relative = nameRelativeUrl(religion, slug);

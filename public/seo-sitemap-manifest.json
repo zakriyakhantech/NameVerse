@@ -3,12 +3,12 @@
   "totalUrls": 42779,
   "sitemapCount": 7,
   "sitemaps": [
-    "https://nameverse.vercel.app/sitemap-pages.xml",
-    "https://nameverse.vercel.app/sitemap-blog.xml",
-    "https://nameverse.vercel.app/sitemap-popularity.xml",
-    "https://nameverse.vercel.app/sitemap-letter.xml",
-    "https://nameverse.vercel.app/sitemap-origin.xml",
-    "https://nameverse.vercel.app/sitemap-category.xml",
-    "https://nameverse.vercel.app/sitemap-gender.xml"
+    "https://nameverse.site/sitemap-pages.xml",
+    "https://nameverse.site/sitemap-blog.xml",
+    "https://nameverse.site/sitemap-popularity.xml",
+    "https://nameverse.site/sitemap-letter.xml",
+    "https://nameverse.site/sitemap-origin.xml",
+    "https://nameverse.site/sitemap-category.xml",
+    "https://nameverse.site/sitemap-gender.xml"
   ]
 }
