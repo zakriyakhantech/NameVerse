@@ -116,6 +116,7 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#4F46E5" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="google-site-verification" content="iPU1wdP26kg58gDN3U4H39YuS20alsLvjfXRM-QtKLw" />
+        <meta name="google-site-verification" content="o6_tP113f-_2jkJtVPB4Oe295w2uz9lulQyhdkCF-D0" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="NameVerse" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
