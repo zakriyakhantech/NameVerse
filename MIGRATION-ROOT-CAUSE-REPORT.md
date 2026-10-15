@@ -139,30 +139,32 @@ failing for every URL whose path doesn't happen to match.
 
 ---
 
-## 3b. The blocker: the middleware was never running
+## 3b. The blocker: the redirect layer never ran
 
-After merging the mapping fix, the live URLs still redirected into 404s. The
-middleware was not executing at all.
+Two separate defects meant the mapping code never executed in production.
+Both had to be fixed before anything changed.
 
-`middleware.js` sat at the **repository root**, but the app lives in `src/app`.
-Next.js requires the file at **`src/middleware.js`** when a `src` directory is
-used; a root-level `middleware.js` is silently ignored — no build error, no
-warning. It has therefore never run.
+**(i) Wrong file location.** `middleware.js` sat at the repository root while the
+app lives in `src/app`. Next.js looks for `src/middleware.js` when a `src`
+directory is used; a root-level `middleware.js` is silently ignored — no build
+error, no warning.
 
-Proof (a path only the middleware would rewrite):
-`/names/islam/abdullah` → `nameverse.site/names/islam/abdullah` → 404.
-The middleware normalises `islam` → `islamic`; the observed URL was not
-normalised, so the middleware did not run.
+**(ii) Wrong execution order.** Next.js 16 renamed the middleware convention to
+**Proxy** (`src/proxy.js`, named `proxy` export) and — critically — runs
+`next.config` redirects **before** the proxy. `next.config.mjs` had ~30
+host-scoped redirect rules including a `'/:path*'` catch-all, so it consumed
+every legacy request and redirected with the path unchanged. That blind host
+swap is the code that produced the 404 destinations. The proxy never ran.
 
-**Every legacy→canonical 301 was actually being served by `next.config.mjs`'s
-`redirects()`**, which do a blind 1:1 path passthrough. That is the code that
-produced the 404 destinations.
+Proof it never ran: `/names/islam/abdullah` → `nameverse.site/names/islam/abdullah`
+→ 404. The redirect layer normalises `islam` → `islamic`; the observed URL was
+not normalised.
 
-Consequences beyond the migration: the middleware's 410-Gone handling,
-uppercase/trailing-slash normalisation and religion-alias redirects were all
-dead code too.
+Consequences beyond the migration: the 410-Gone handling, uppercase/trailing-slash
+normalisation and religion-alias redirects were all dead code too.
 
-**Fix:** `git mv middleware.js src/middleware.js`.
+**Fixes:** `middleware.js` → `src/proxy.js` (`export function proxy`), and all
+host-scoped rules removed from `next.config.mjs`.
 
 ## 4. What was changed
 
@@ -186,6 +188,14 @@ Rules, all verified against the live site:
 - name pages → 1:1 only when the slug's first letter is within that tradition's canonical range,
   else the tradition hub.
 
+### Verified live after deployment
+
+| Request | Before | After |
+|---|---|---|
+| `/islamic/boy-names` | `nameverse.site/islamic/boy-names` → **404** | `/islamic-boy-names` → **200** (1,863 names) |
+| `/names/islam/abdullah` | `.../names/islam/abdullah` → **404** | `/names/islamic/abdullah` → **200** |
+| `/stories` | `nameverse.site/stories` → **404** | `/blog` → **200** |
+
 **Result across all 42,779 legacy URLs:**
 
 | | URLs | Before | After |
@@ -196,8 +206,8 @@ Rules, all verified against the live site:
 
 **15,001 URLs** that previously terminated in a 404 now land on a live page.
 
-**`src/middleware.js`** (moved from the repo root, where Next.js ignored it) — the blind host
-swap is replaced by:
+**`src/proxy.js`** (was root `middleware.js`, which Next.js ignored) — the blind host swap is
+replaced by:
 - host normalisation runs first, before any path logic;
 - **every** non-canonical host is collapsed onto `https://nameverse.site` in one 301 — this now
   covers preview/branch deployments and `www`, not just the two hardcoded hosts;
