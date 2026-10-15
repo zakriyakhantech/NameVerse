@@ -10,6 +10,7 @@
     "ci:validate-slugs": "node scripts/ci-validate-slugs.js",
     "seo:validate": "node src/lib/seo/validation-suite.mjs",
     "sitemap:build": "node scripts/build-sitemap.js",
+    "migration:audit": "node scripts/audit-migration.mjs",
     "seo:audit": "npm run seo:validate && npm run sitemap:build",
     "clear-next-cache": "rimraf .next",
     "clear-all-cache": "rimraf .next node_modules/.cache",

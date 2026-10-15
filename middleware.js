@@ -17,6 +17,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { mapLegacyPath, isLegacySchemeHost, isLocalHost } from '@/lib/seo/legacy-redirect-map.mjs';
 
 const VALID_RELIGIONS = ['islamic', 'christian', 'hindu'];
 
@@ -172,15 +173,35 @@ export function middleware(request) {
   const canonicalHost = (process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site').replace(/^https?:\/\//i, '').replace(/\/+$/, '').toLowerCase();
   const normalizedHost = (host || '').replace(/\.$/, '').toLowerCase();
 
-  // Redirect old Vercel host or www to the canonical domain in ONE hop.
-  if (normalizedHost === 'nameverse.vercel.app' || normalizedHost === 'www.nameverse.vercel.app' || normalizedHost === `www.${canonicalHost}`) {
+  // ── HOST NORMALISATION (always first, before any path logic) ──
+  // Every non-canonical hostname is collapsed onto https://nameverse.site in a
+  // SINGLE 301. This covers:
+  //   - nameverse.vercel.app      the legacy system domain
+  //   - *.vercel.app              branch + preview deployments. These are
+  //                               publicly reachable and were serving an extra
+  //                               crawlable copy of the site, which competes
+  //                               with the canonical host in the index.
+  //   - www.nameverse.site        the www variant
+  //
+  // Vercel hostnames additionally have their PATH translated, because the legacy
+  // site and the canonical site no longer share a URL scheme. A blind host swap
+  // sends /islamic/boy-names → nameverse.site/islamic/boy-names → 404, and
+  // Google will not consolidate a 301 that lands on a 404/soft-404 — it keeps
+  // serving the old URL instead. That is the mechanism that kept
+  // nameverse.vercel.app ranking for months after the move.
+  // See src/lib/seo/legacy-redirect-map.mjs for the verified mapping table.
+  if (!isLocalHost(normalizedHost) && normalizedHost !== canonicalHost) {
     const url = new URL(request.url);
-    url.hostname = canonicalHost;
     url.protocol = 'https:';
+    url.hostname = canonicalHost;
+    url.pathname = isLegacySchemeHost(normalizedHost) ? mapLegacyPath(path) : path;
     return NextResponse.redirect(url, 301);
   }
 
-  if (normalizedHost === canonicalHost && protocol === 'http') {
+  // http → https on the canonical host.
+  // NOTE: request.nextUrl.protocol returns the protocol WITH the trailing colon
+  // ('http:' / 'https:'), so the comparison must include it.
+  if (normalizedHost === canonicalHost && protocol === 'http:') {
     const url = new URL(request.url);
     url.protocol = 'https:';
     return NextResponse.redirect(url, 301);

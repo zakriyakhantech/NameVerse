@@ -47,6 +47,17 @@ const nextConfig = {
   // NOTE: Religion-path normalization (islam/muslim/christianity/hinduism →
   // canonical islamic/christian/hindu) lives in middleware.js, NOT here, to
   // avoid double-hop redirect chains. Do not re-add those four rules below.
+  //
+  // ⚠ SUPERSEDED — DO NOT RELY ON THE hostRule() ENTRIES BELOW FOR THE MIGRATION
+  // middleware.js intercepts every request before this file is consulted, so the
+  // `host: nameverse.vercel.app` rules below are currently unreachable.
+  // They are ALSO wrong: they do a blind 1:1 path passthrough, which sends
+  // legacy URLs like /islamic/boy-names and /names/islamic/letter/A/1 to pages
+  // that return 404 on nameverse.site. Google will not consolidate a 301 that
+  // lands on a 404, which is why the old hostname stayed in the index.
+  // The authoritative legacy→canonical mapping is
+  // src/lib/seo/legacy-redirect-map.mjs (used by middleware.js).
+  // Verify with: npm run migration:audit
   async redirects() {
     const HOST_OLD = 'nameverse.vercel.app';
     const HOST_NEW = CANONICAL_SITE_URL;

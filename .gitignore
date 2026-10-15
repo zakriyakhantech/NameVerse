@@ -30,3 +30,6 @@ Thumbs.db
 *.bak
 *.swp
 *.swo
+
+# Migration audit output (generated, can be large)
+migration-audit/
