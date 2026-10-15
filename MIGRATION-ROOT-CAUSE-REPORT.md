@@ -81,8 +81,20 @@ The two sites have **incompatible URL schemes**:
 | `/names/religion/islamic/2` | `/names/islamic` |
 | `/unique-names` | `/unique-baby-names` |
 | `/languages` | `/origins` |
-| `/my-names`, `/advanced-search` | *(no equivalent)* |
+| `/my-names`, `/advanced-search`, `/search` | *(no equivalent)* |
+| `/blog/<slug>` (66 posts) | `/blog/<slug>` (**9 posts**) |
+| `/guides/<slug>` | `/guides/expert-naming-guide` only |
 | `/names/<religion>/<slug>` | `/names/<religion>/<slug>` ✅ same |
+
+**Letter coverage is partial on the canonical site.** Only these letters have pages:
+
+| Tradition | Letters with a page | Total names |
+|---|---|---|
+| Islamic | a–n | 3,480 |
+| Christian | a–j | 4,026 |
+| Hindu | a–r | 3,906 |
+
+Spot-checked live: `/names/islamic/letter/o` → **404** and `/names/islamic/omar` → **404**.
 
 `middleware.js` did this and nothing else:
 
@@ -104,11 +116,12 @@ which is exactly the symptom. This is not "Google being slow"; the migration is 
 failing for every URL whose path doesn't happen to match.
 
 **Scale of the problem**
-- **72.5% of name pages have no destination at all.** 41,554 legacy name URLs vs 11,412 on the
-  canonical site → **~30,142 URLs** redirect into a 404.
-- Every hub/listing page (`/{religion}/{gender}-names`, all letter pagination, all origin
-  pagination, all category pagination, `/names/religion/*`) redirected into a 404. These are the
+- **Every hub/listing page redirected into a 404** — `/{religion}/{gender}-names`, all letter
+  pagination, all origin pagination, all category pagination, `/names/religion/*`. These are the
   highest-authority, highest-traffic URLs on the site.
+- **57 of 66 blog posts** had no destination (the canonical blog publishes 9).
+- **41,554 legacy name URLs vs 11,412 canonical names.** 13,776 of them fail on the first letter
+  alone (e.g. every Islamic name from o–z); the rest depend on whether that exact record exists.
 
 **Secondary issues found**
 
@@ -132,9 +145,31 @@ failing for every URL whose path doesn't happen to match.
 Rule enforced: *a legacy URL may only redirect to a destination verified to return 200 on the
 canonical host; anything with no true equivalent goes to the closest real hub, never to a 404.*
 
-Verified destinations used by the table: `/islamic-boy-names`, `/unique-baby-names`,
-`/names/islamic/letter/a`, `/origins/arabic`, `/baby-names-by-state`, `/biblical-baby-names`,
-`/top-baby-names-2026`, `/origins`, `/categories`, `/privacy`, `/terms`, `/names`, `/blog`.
+Rules, all verified against the live site:
+- hub renames — `/{religion}/{gender}-names` → `/{religion}-{gender}-names`, `/unique-names` →
+  `/unique-baby-names`, `/languages` → `/origins`, `/top-baby-names-usa` → `/top-baby-names-2026`,
+  `/popular-by-state` → `/baby-names-by-state`, `/biblical-names` → `/biblical-baby-names`,
+  `/stories` → `/blog`, `/viral-names` → `/trending-names`;
+- features with no equivalent (`/my-names`, `/advanced-search`, `/search`, `/boy-names`,
+  `/girl-names`, `/sibling-names`, `/name-generator`) → `/names`;
+- letter pagination → the lowercase letter hub, or the tradition hub when that letter has no page;
+- origin pagination → `/origins/<origin>` for the 10 known origins, else the tradition hub;
+- category pagination → `/categories/<category>` for the 4 known categories, else the tradition hub;
+- `/names/religion/<religion>/<page>` → `/names/<religion>`;
+- blog posts → 1:1 for the 9 canonical slugs, else `/blog`;
+- guides → 1:1 for `expert-naming-guide`, else that guide;
+- name pages → 1:1 only when the slug's first letter is within that tradition's canonical range,
+  else the tradition hub.
+
+**Result across all 42,779 legacy URLs:**
+
+| | URLs | Before | After |
+|---|---|---|---|
+| Hubs / listings / blog / guides | 1,225 | mostly 404 | all land on a real page |
+| Name pages outside canonical letter range | 13,776 | 404 | tradition hub |
+| Name pages inside canonical letter range | 27,778 | 1:1 | 1:1 (unchanged) |
+
+**15,001 URLs** that previously terminated in a 404 now land on a live page.
 
 **`middleware.js`** — the blind host swap is replaced by:
 - host normalisation runs first, before any path logic;
