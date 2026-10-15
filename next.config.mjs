@@ -41,79 +41,41 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
-  // REDIRECT CLEANUP: All redirects in one place — no chains, no loops
+  // REDIRECT CLEANUP
   // Rule: ONE URL → ONE redirect → final 200 page
   //
-  // NOTE: Religion-path normalization (islam/muslim/christianity/hinduism →
-  // canonical islamic/christian/hindu) lives in middleware.js, NOT here, to
-  // avoid double-hop redirect chains. Do not re-add those four rules below.
+  // ⚠ INCIDENT (2026-10) — DO NOT REINTRODUCE HOST-SCOPED REDIRECTS HERE.
   //
-  // ⚠ THESE hostRule() ENTRIES ARE A LAST-RESORT FALLBACK — DO NOT RELY ON THEM.
+  // The legacy→canonical migration used to be driven by ~30 `host:`-scoped
+  // rules in this file, including a '/:path*' catch-all. Two problems:
   //
-  // INCIDENT (2026-10): the middleware lived at the repo ROOT while the app is
-  // in src/app. Next.js requires src/middleware.js when a src directory is used,
-  // so the root file was silently ignored and NEVER RAN. Every legacy→canonical
-  // 301 was served by these rules instead. They do a blind 1:1 path passthrough,
-  // which sent /islamic/boy-names → nameverse.site/islamic/boy-names → 404 and
-  // /names/islamic/letter/A/1 → nameverse.site/names/islamic/letter/A/1 → 404.
-  // Google will not consolidate a 301 that lands on a 404, which is why
-  // nameverse.vercel.app kept ranking and traffic for months.
+  //   1. They were a BLIND HOST SWAP — only the hostname was replaced, the path
+  //      was passed through unchanged. But nameverse.site is a separate Netlify
+  //      build with a different URL scheme, so /islamic/boy-names became
+  //      nameverse.site/islamic/boy-names → 404, and /names/islamic/letter/A/1
+  //      became nameverse.site/names/islamic/letter/A/1 → 404.
+  //      Google does not consolidate a 301 that lands on a 404, which is why
+  //      nameverse.vercel.app kept ranking and traffic for months.
   //
-  // The authoritative mapping is src/lib/seo/legacy-redirect-map.mjs, used by
-  // src/middleware.js. Verify with: npm run migration:audit
+  //   2. In Next.js 16 these redirects run BEFORE the proxy, so the catch-all
+  //      consumed every legacy request before src/proxy.js could map it.
   //
-  // If src/middleware.js is ever removed or fails to build, these rules take
-  // over — and they are NOT corrected for the canonical URL scheme. Fix them
-  // before relying on them.
+  // The authoritative mapping now lives in src/lib/seo/legacy-redirect-map.mjs,
+  // applied by src/proxy.js. Verify with: npm run migration:audit
+
   async redirects() {
-    const HOST_OLD = 'nameverse.vercel.app';
-    const HOST_NEW = CANONICAL_SITE_URL;
-
-    const hostRule = (source, destination, hostValue = HOST_OLD) => ({
-      source,
-      has: [{ type: 'host', value: hostValue }],
-      destination,
-      permanent: true,
-    });
-
+    // ── DOMAIN MIGRATION ────────────────────────────────────────────────────
+    // The legacy→canonical mapping now lives entirely in src/proxy.js
+    // (Next.js 16 renamed middleware to proxy).
+    //
+    // DO NOT add host-scoped rules back here, especially a '/:path*' catch-all.
+    // Next.js 16 runs next.config redirects BEFORE the proxy, so any catch-all
+    // here consumed every legacy request and redirected it with the path
+    // unchanged — a blind host swap that landed on 404s at nameverse.site.
+    // That is what kept nameverse.vercel.app ranking for months.
+    //
+    // Legacy internal path fixes (host-agnostic) only:
     return [
-      // ── DOMAIN MIGRATION: old Vercel host → canonical domain ──
-      hostRule('/:path*', `${HOST_NEW}/:path*`, HOST_OLD),
-      hostRule('/', `${HOST_NEW}/`, HOST_OLD),
-      hostRule('/names', `${HOST_NEW}/names`, HOST_OLD),
-      hostRule('/search', `${HOST_NEW}/search`, HOST_OLD),
-      hostRule('/blog', `${HOST_NEW}/blog`, HOST_OLD),
-      hostRule('/about', `${HOST_NEW}/about`, HOST_OLD),
-      hostRule('/privacy', `${HOST_NEW}/privacy`, HOST_OLD),
-      hostRule('/terms', `${HOST_NEW}/terms`, HOST_OLD),
-      hostRule('/languages', `${HOST_NEW}/languages`, HOST_OLD),
-      hostRule('/popularity', `${HOST_NEW}/popularity`, HOST_OLD),
-      hostRule('/name-meanings', `${HOST_NEW}/name-meanings`, HOST_OLD),
-      hostRule('/names-by-meaning', `${HOST_NEW}/names-by-meaning`, HOST_OLD),
-      hostRule('/names-by-origin', `${HOST_NEW}/names-by-origin`, HOST_OLD),
-      hostRule('/unique-names', `${HOST_NEW}/unique-names`, HOST_OLD),
-      hostRule('/trending-names', `${HOST_NEW}/trending-names`, HOST_OLD),
-      hostRule('/advanced-search', `${HOST_NEW}/advanced-search`, HOST_OLD),
-      hostRule('/my-names', `${HOST_NEW}/my-names`, HOST_OLD),
-      hostRule('/guides/expert-naming-guide', `${HOST_NEW}/guides/expert-naming-guide`, HOST_OLD),
-      hostRule('/viral-names', `${HOST_NEW}/viral-names`, HOST_OLD),
-      hostRule('/stories', `${HOST_NEW}/stories`, HOST_OLD),
-      hostRule('/(islamic|christian|hindu)/(boy-names|girl-names)', `${HOST_NEW}/:1/:2`, HOST_OLD),
-      hostRule('/names/:religion(islamic|christian|hindu)/:slug', `${HOST_NEW}/names/:religion/:slug`, HOST_OLD),
-      hostRule('/blog/:slug', `${HOST_NEW}/blog/:slug`, HOST_OLD),
-      hostRule('/names/religion/:religion(islamic|christian|hindu)/:page([0-9]+)', `${HOST_NEW}/names/religion/:religion/:page`, HOST_OLD),
-      hostRule('/names/:religion(islamic|christian|hindu)/letter/:letter([A-Za-z])/:page([0-9]+)', `${HOST_NEW}/names/:religion/letter/:letter/:page`, HOST_OLD),
-      hostRule('/names/:religion(islamic|christian|hindu)/origin/:origin([a-z0-9-]+)/:page([0-9]+)', `${HOST_NEW}/names/:religion/origin/:origin/:page`, HOST_OLD),
-      hostRule('/names/:religion(islamic|christian|hindu)/categories/:category([a-z0-9-]+)/:page([0-9]+)', `${HOST_NEW}/names/:religion/categories/:category/:page`, HOST_OLD),
-      hostRule('/baby-names/:path*', `${HOST_NEW}/names/:path*`, HOST_OLD),
-      hostRule('/baby-names', `${HOST_NEW}/names`, HOST_OLD),
-      hostRule('/name/:path*', `${HOST_NEW}/names/:path*`, HOST_OLD),
-      hostRule('/article/:path*', `${HOST_NEW}/blog/:path*`, HOST_OLD),
-      hostRule('/meaning/:path*', `${HOST_NEW}/name-meanings`, HOST_OLD),
-      hostRule('/stories/:path*', `${HOST_NEW}/blog`, HOST_OLD),
-      hostRule('/religions/:path*', `${HOST_NEW}/names`, HOST_OLD),
-
-      // ── LEGACY INTERNAL REDIRECTS (no host condition) ──
       { source: '/baby-names/:path*', destination: '/names/:path*', permanent: true },
       { source: '/baby-names', destination: '/names', permanent: true },
       { source: '/name/:path*', destination: '/names/:path*', permanent: true },
