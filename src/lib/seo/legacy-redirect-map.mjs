@@ -101,6 +101,14 @@ const CANONICAL_BLOG_SLUGS = new Set([
   'christian-baby-names-bible',
 ]);
 
+/** Religion aliases accepted by the legacy site, mapped to canonical values. */
+const RELIGION_ALIASES = {
+  islam: 'islamic',
+  muslim: 'islamic',
+  christianity: 'christian',
+  hinduism: 'hindu',
+};
+
 /**
  * Sub-paths under /names/<religion>/ that are route keywords, not name slugs.
  * They must never be treated as a name detail page.
@@ -173,7 +181,18 @@ function normalizePath(pathname = '/') {
  * @returns {string} A path that returns 200 on nameverse.site.
  */
 export function mapLegacyPath(pathname = '/') {
-  const path = normalizePath(pathname);
+  let path = normalizePath(pathname);
+
+  // 0. Religion aliases. The legacy site accepts /names/islam/…, /names/muslim/…,
+  //    /names/christianity/… and /names/hinduism/… — the canonical site only has
+  //    islamic/christian/hindu. Normalise FIRST so every later rule matches.
+  //    (This used to sit after the host redirect in the old middleware, so it
+  //    never fired for legacy-host traffic.)
+  const alias = path.match(/^\/names\/(islam|muslim|christianity|hinduism)(\/|$)/);
+  if (alias) {
+    path = path.replace(/^\/names\/(islam|muslim|christianity|hinduism)/, `/names/${RELIGION_ALIASES[alias[1]]}`);
+    if (path === `/names/${RELIGION_ALIASES[alias[1]]}`) return path;
+  }
 
   // 1. Exact renames.
   if (LEGACY_PATH_RENAMES.has(path)) return LEGACY_PATH_RENAMES.get(path);

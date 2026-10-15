@@ -1,5 +1,11 @@
 /**
- * SEO FIREWALL MIDDLEWARE — Vercel Edge
+ * SEO FIREWALL PROXY — Next.js 16+
+ *
+ * Next.js 16 renamed the middleware file convention to "proxy" and looks for
+ * src/proxy.js. A root-level middleware.js is ignored AND, critically, Next 16
+ * runs next.config redirects BEFORE the proxy — so any catch-all redirect in
+ * next.config.mjs consumes the request before this file ever runs. The host
+ * catch-all has been removed from next.config.mjs for that reason.
  *
  * SINGLE-HOP REDIRECT ARCHITECTURE:
  * Every URL is normalized in ONE redirect, never multiple.
@@ -167,7 +173,7 @@ function handleOldUrlRedirect(path) {
   return null;
 }
 
-export function middleware(request) {
+export function proxy(request) {
   const { pathname, host, protocol } = request.nextUrl;
   const path = pathname;
   const canonicalHost = (process.env.NEXT_PUBLIC_SITE_URL || 'https://nameverse.site').replace(/^https?:\/\//i, '').replace(/\/+$/, '').toLowerCase();
