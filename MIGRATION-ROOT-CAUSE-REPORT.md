@@ -139,6 +139,31 @@ failing for every URL whose path doesn't happen to match.
 
 ---
 
+## 3b. The blocker: the middleware was never running
+
+After merging the mapping fix, the live URLs still redirected into 404s. The
+middleware was not executing at all.
+
+`middleware.js` sat at the **repository root**, but the app lives in `src/app`.
+Next.js requires the file at **`src/middleware.js`** when a `src` directory is
+used; a root-level `middleware.js` is silently ignored — no build error, no
+warning. It has therefore never run.
+
+Proof (a path only the middleware would rewrite):
+`/names/islam/abdullah` → `nameverse.site/names/islam/abdullah` → 404.
+The middleware normalises `islam` → `islamic`; the observed URL was not
+normalised, so the middleware did not run.
+
+**Every legacy→canonical 301 was actually being served by `next.config.mjs`'s
+`redirects()`**, which do a blind 1:1 path passthrough. That is the code that
+produced the 404 destinations.
+
+Consequences beyond the migration: the middleware's 410-Gone handling,
+uppercase/trailing-slash normalisation and religion-alias redirects were all
+dead code too.
+
+**Fix:** `git mv middleware.js src/middleware.js`.
+
 ## 4. What was changed
 
 **`src/lib/seo/legacy-redirect-map.mjs`** (new) — the authoritative legacy→canonical mapping.
@@ -171,7 +196,8 @@ Rules, all verified against the live site:
 
 **15,001 URLs** that previously terminated in a 404 now land on a live page.
 
-**`middleware.js`** — the blind host swap is replaced by:
+**`src/middleware.js`** (moved from the repo root, where Next.js ignored it) — the blind host
+swap is replaced by:
 - host normalisation runs first, before any path logic;
 - **every** non-canonical host is collapsed onto `https://nameverse.site` in one 301 — this now
   covers preview/branch deployments and `www`, not just the two hardcoded hosts;
