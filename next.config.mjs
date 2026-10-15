@@ -48,16 +48,23 @@ const nextConfig = {
   // canonical islamic/christian/hindu) lives in middleware.js, NOT here, to
   // avoid double-hop redirect chains. Do not re-add those four rules below.
   //
-  // ⚠ SUPERSEDED — DO NOT RELY ON THE hostRule() ENTRIES BELOW FOR THE MIGRATION
-  // middleware.js intercepts every request before this file is consulted, so the
-  // `host: nameverse.vercel.app` rules below are currently unreachable.
-  // They are ALSO wrong: they do a blind 1:1 path passthrough, which sends
-  // legacy URLs like /islamic/boy-names and /names/islamic/letter/A/1 to pages
-  // that return 404 on nameverse.site. Google will not consolidate a 301 that
-  // lands on a 404, which is why the old hostname stayed in the index.
-  // The authoritative legacy→canonical mapping is
-  // src/lib/seo/legacy-redirect-map.mjs (used by middleware.js).
-  // Verify with: npm run migration:audit
+  // ⚠ THESE hostRule() ENTRIES ARE A LAST-RESORT FALLBACK — DO NOT RELY ON THEM.
+  //
+  // INCIDENT (2026-10): the middleware lived at the repo ROOT while the app is
+  // in src/app. Next.js requires src/middleware.js when a src directory is used,
+  // so the root file was silently ignored and NEVER RAN. Every legacy→canonical
+  // 301 was served by these rules instead. They do a blind 1:1 path passthrough,
+  // which sent /islamic/boy-names → nameverse.site/islamic/boy-names → 404 and
+  // /names/islamic/letter/A/1 → nameverse.site/names/islamic/letter/A/1 → 404.
+  // Google will not consolidate a 301 that lands on a 404, which is why
+  // nameverse.vercel.app kept ranking and traffic for months.
+  //
+  // The authoritative mapping is src/lib/seo/legacy-redirect-map.mjs, used by
+  // src/middleware.js. Verify with: npm run migration:audit
+  //
+  // If src/middleware.js is ever removed or fails to build, these rules take
+  // over — and they are NOT corrected for the canonical URL scheme. Fix them
+  // before relying on them.
   async redirects() {
     const HOST_OLD = 'nameverse.vercel.app';
     const HOST_NEW = CANONICAL_SITE_URL;
